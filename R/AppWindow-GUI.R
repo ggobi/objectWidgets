@@ -1,11 +1,8 @@
 qsetClass("DataViewer", Qt$QTableView, function(grl, parent = NULL)
 {
   super(parent)
-
   #this$setMinimumSize(550,350)
-  
   this$sortingEnabled <- TRUE
-
 })
 
 # Going to need to rework this function now that the data will be stored

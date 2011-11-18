@@ -1,0 +1,4 @@
+import(qtbase)
+import(objectSignals)
+import(objectProperties)
+exportPattern("^[^\\.]")

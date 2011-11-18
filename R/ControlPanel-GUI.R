@@ -1,33 +1,40 @@
-# pass in GraphicPars() ??
 # should this inherit from QDialog?
 # submit button not currently necessary due to automatic updating
-qsetClass("ControlPanel", Qt$QWidget, function(gp, parent = NULL) {
+## need to support properties
+qsetClass("ControlPanel", Qt$QWidget, function(obj, exposed = list(),
+                                               type, parent = NULL) {
   super(parent)
-
+  if(length(exposed)){
+    ## nm.e <- names(exposed)
+    if(!all(names(obj$properties()) %in% names(exposed)))
+      stop("Names of list must be within the property set items")
+    ## expd <- rep(!)
+    expd <- unlist(exposed)[names(obj$properties())]
+    ppt <- obj$properties()[expd]    
+  }else{
+    ppt <- obj$properties()
+  }
   #this$submit <- Qt$QPushButton("Submit")
-  this$reset <- Qt$QPushButton("Reset to Defaults")
-
+  ## this$reset <- Qt$QPushButton("Reset to Defaults")
   #qconnect(submit, "clicked", function() {
   #  sapply((l.col), function(i) {
-  #    eval(parse(text=paste("gp$",i$getPar()," <- i$getValue()",sep="")))
+  #    eval(parse(text=paste("obj$",i$getPar()," <- i$getValue()",sep="")))
   #  })
   #
   #  sapply(c(l.range,l.enum), function(i) {
-  #    eval(parse(text=paste("gp$",i$getPar()," <- i$getValue()",
+  #    eval(parse(text=paste("obj$",i$getPar()," <- i$getValue()",
   #                 sep="")))
   #  })
   #})
-
-  qconnect(reset, "clicked", function() {
-    gp$reset()
-    sapply(l.wid, function(i) {
-      i$setDefault()
-    })
-  })
-
+  ## qconnect(reset, "clicked", function() {
+  ##   obj$reset()
+  ##   sapply(l.wid, function(i) {
+  ##     i$setDefault()
+  ##   })
+  ## })
   blyt <- Qt$QHBoxLayout()
   blyt$insertStretch(0,1)
-  blyt$addWidget(reset)
+  ## blyt$addWidget(reset)
   #blyt$addWidget(submit)
 
   olyt <- Qt$QVBoxLayout()
@@ -39,86 +46,89 @@ qsetClass("ControlPanel", Qt$QWidget, function(gp, parent = NULL) {
 
   this$l.lab <- list()
   this$l.wid <- list()
-  
+  ## FIXME: no exposed
   # color widgets
-  sapply(gp$output()$pars[gp$output()$exposed &
-                          (gp$output()$class == "Color")], function(i) {
-    l.wid[[i]] <<- ColorParWidget(gp, i)
-    l.lab[[i]] <<- ParLabel(gp, i)
+  sapply(names(ppt)[ppt == "Color"], function(i) {
+    l.wid[[i]] <<- ColorParWidget(obj, i)
+    l.lab[[i]] <<- ParLabel(obj, i)
     lyt$addRow(l.lab[[i]], l.wid[[i]])
   })
 
-  sapply(gp$output()$pars[gp$output()$exposed & 
-          (sapply(gp$output()$value, function(i) is(i,"ColorEnum")))],
-    function(i) {
-      l.wid[[i]] <<- ColorEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParLabel(gp, i)
-      lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
+  ##   sapply(names(ppt)[ppt == "Color"], function(i) {
+  ##   l.wid[[i]] <<- ColorParWidget(obj, i)
+  ##   l.lab[[i]] <<- ParLabel(obj, i)
+  ##   lyt$addRow(l.lab[[i]], l.wid[[i]])
+  ## })
+
+  ## sapply(ppt[(sapply(obj$)$value, function(i) is(i,"ColorEnum")))],
+  ##   function(i) {
+  ##     l.wid[[i]] <<- ColorEnumParWidget(obj, i)
+  ##     l.lab[[i]] <<- ParLabel(obj, i)
+  ##     lyt$addRow(l.lab[[i]], l.wid[[i]])
+  ## })  
 
   # character widgets
-  sapply(gp$output()$pars[gp$output()$exposed &
-                          (gp$output()$class == "character")], function(i) {
-    l.wid[[i]] <<- CharParWidget(gp, i)
-    l.lab[[i]] <<- ParLabel(gp, i)
+  sapply(names(ppt)[ppt == "character"], function(i) {
+    l.wid[[i]] <<- CharParWidget(obj, i)
+    l.lab[[i]] <<- ParLabel(obj, i)
     lyt$addRow(l.lab[[i]], l.wid[[i]])
   })
 
   # numeric with range widgets
-  sapply(gp$output()$pars[gp$output()$exposed & (gp$output()$class ==
-                                      "NumericWithMin0Max1")], function(i) {
-    l.wid[[i]] <<- RangeParWidget(gp, i, "double")
-    l.lab[[i]] <<- ParLabel(gp, i)
+  sapply(names(ppt)[ppt == "NumericWithMin0Max1"], function(i) {
+    l.wid[[i]] <<- RangeParWidget(obj, i, "double")
+    l.lab[[i]] <<- ParLabel(obj, i)
     lyt$addRow(l.lab[[i]], l.wid[[i]])
   })
 
   # integer with range widgets
-  sapply(gp$output()$pars[gp$output()$exposed & (gp$output()$class ==
-                                         "IntegerWithRange")], function(i) {
-    l.wid[[i]] <<- RangeParWidget(gp, i, "int")
-    l.lab[[i]] <<- ParLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
+  ## sapply(obj$output()$pars[ppt == "IntegerWithRange")], function(i) {
+  ##   l.wid[[i]] <<- RangeParWidget(obj, i, "int")
+  ##   l.lab[[i]] <<- ParLabel(obj, i)
+  ##   lyt$addRow(l.lab[[i]], l.wid[[i]])
+  ## })  
 
   # integer widgets
-  sapply(gp$output()$pars[gp$output()$exposed & (gp$output()$class %in%
+  sapply(names(ppt)[ppt %in%
     c("PositiveInteger","NonnegativeInteger","NegativeInteger",
-      "NonpositiveInteger"))], function(i) {
-    l.wid[[i]] <<- IntParWidget(gp, i, substr(gp$output()$class[i],1,6))
-    l.lab[[i]] <<- ParLabel(gp, i)
+      "NonpositiveInteger")], function(i) {
+    l.wid[[i]] <<- IntParWidget(obj, i, substr(ppt[i],1,6))
+    l.lab[[i]] <<- ParLabel(obj, i)
     lyt$addRow(l.lab[[i]], l.wid[[i]])
   })  
   
   # single enum widgets (not color or glyph enum)
-  sapply(gp$output()$pars[gp$output()$exposed & 
-                          (sapply(gp$output()$value, function(i) is(i,"SingleEnum"))) &
-                          (sapply(gp$output()$value, function(i) !is(i,"ColorEnum"))) &
-                          (sapply(gp$output()$value, function(i) !is(i,"GlyphEnum")))],
+  sapply(names(ppt)[
+                          (sapply(ppt, function(i)
+                                  extends(i,"SingleEnum"))) &
+                          (sapply(ppt, function(i)
+                                  !extends(i,"ColorEnum"))) &
+                          (sapply(ppt, function(i)
+                                  !extends(i,"GlyphEnum")))],
          function(i) {
-           l.wid[[i]] <<- SingleEnumParWidget(gp, i)
-           l.lab[[i]] <<- ParLabel(gp, i)
+           l.wid[[i]] <<- SingleEnumParWidget(obj, i)
+           l.lab[[i]] <<- ParLabel(obj, i)
            lyt$addRow(l.lab[[i]], l.wid[[i]])
          })  
 
   # multiple enum widgets
-  sapply(gp$output()$pars[gp$output()$exposed & 
-          (sapply(gp$output()$value, function(i) is(i,"MultipleEnum")))],
+  sapply(names(ppt)[sapply(ppt,
+                                       function(i) extends(i,"MultipleEnum"))],
     function(i) {
-      l.wid[[i]] <<- MultEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParLabel(gp, i)
+      l.wid[[i]] <<- MultEnumParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
   })
 
   # glyph enum widgets
-  sapply(gp$output()$pars[gp$output()$exposed & 
-          (sapply(gp$output()$value, function(i) is(i,"GlyphEnum")))],
+  sapply(names(ppt)[
+          (sapply(ppt, function(i) extends(i,"GlyphEnum")))],
     function(i) {
-      l.wid[[i]] <<- GlyphEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParLabel(gp, i)
+      l.wid[[i]] <<- GlyphEnumParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
   })
   
-
   
   olyt$addLayout(lyt)
   olyt$addLayout(blyt)
@@ -131,16 +141,17 @@ qsetMethod("setValue", ControlPanel, function(par, val) {
 })
 
 # widget to handle changing colors
-qsetClass("ColorParWidget", Qt$QWidget, function(gp, par, parent = NULL) {
+qsetClass("ColorParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
+  initColor <- obj$field(par)
+  ## initColor <- obj$field(par)
 
-  initColor <- eval(parse(text=paste("gp$",par,sep="")))
 
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
   this$parSwatch <- Qt$QPushButton()
   parSwatch$setAutoFillBackground(TRUE)
   parSwatch$setFocusPolicy(Qt$Qt$NoFocus)
@@ -179,12 +190,12 @@ qsetMethod("getValue", ColorParWidget, function() {
   parEdit$text
 })
 
-# also updates the gp object with new color
+# also updates the obj object with new color
 qsetMethod("setValue", ColorParWidget, function(clr) {
   if(Qt$QColor$isValidColor(clr)) {
     parSwatch$setStyleSheet(paste("background-color:",clr,sep=""))
     parEdit$setText(clr)
-    eval(parse(text=paste("gp$",par," <- parEdit$text",sep="")))
+    eval(parse(text=paste("obj$",par," <- parEdit$text",sep="")))
   } else {
     parEdit$setText("")
     parLabel$setFocus(Qt$Qt$OtherFocusReason)
@@ -193,20 +204,20 @@ qsetMethod("setValue", ColorParWidget, function(clr) {
 })
 
 qsetMethod("setDefault", ColorParWidget, function() {
-  clr <- eval(parse(text=paste("gp$",par,sep="")))
+  clr <- obj$field(par)
   parSwatch$setStyleSheet(paste("background-color:",clr,sep=""))
   parEdit$setText(clr)  
 })
 
 
 # widget to handle changing colors
-qsetClass("ColorEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL) {
+qsetClass("ColorEnumParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  initColor <- eval(parse(text=paste("gp$",par,sep="")))
+  initColor <- obj$field(par)
 
-  this$colors <- eval(parse(text=paste("levels(gp$",par,")",sep="")))
+  this$colors <- eval(parse(text=paste("levels(obj$",par,")",sep="")))
   
   this$dropList <- Qt$QComboBox()
   sapply(colors, function(i) {
@@ -218,9 +229,9 @@ qsetClass("ColorEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL) {
   dropList$setCurrentIndex(which(colors == initColor) - 1)
   dropList$setIconSize(Qt$QSize(40,20))  
 
-  # change gp when user changes level
+  # change obj when user changes level
   qconnect(dropList, "currentIndexChanged(QString)", function(idx) {
-    eval(parse(text=paste("gp$",par,
+    eval(parse(text=paste("obj$",par,
                  " <- dropList$currentText",sep="")))
   })
 
@@ -243,38 +254,36 @@ qsetMethod("setValue", ColorEnumParWidget, function(val) {
 })
 
 qsetMethod("setDefault", ColorEnumParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   dropList$setCurrentIndex(which(colors == val) - 1)
 })
 
 
 
 # widget to handle changing colors
-qsetClass("GlyphEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL) {
+qsetClass("GlyphEnumParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  initLvl <- eval(parse(text=paste("gp$",par,sep="")))
+  initLvl <- obj$field(par)
 
-  this$levels <- eval(parse(text=paste("levels(gp$",par,")",sep="")))
+  this$levels <- eval(parse(text=paste("levels(obj$",par,")",sep="")))
   
   this$dropList <- Qt$QComboBox()
-  icons <- eval(parse(text=paste("icons(gp$",par,")",sep="")))
+  icons <- eval(parse(text=paste("icons(obj$",par,")",sep="")))
   sapply(seq_along(levels), function(i) {
     dropList$addItem(icons[[i]],levels[i])
   })
   dropList$setCurrentIndex(which(levels == initLvl) - 1)
   dropList$setIconSize(Qt$QSize(40,20))  
 
-  # change gp when user changes level
+  # change obj when user changes level
   qconnect(dropList, "currentIndexChanged(QString)", function(idx) {
-    eval(parse(text=paste("gp$",par,
+    eval(parse(text=paste("obj$",par,
                  " <- dropList$currentText",sep="")))
   })
-
   lyt <- Qt$QHBoxLayout()
   lyt$addWidget(dropList)
-  
   setLayout(lyt)
 })
 
@@ -291,29 +300,27 @@ qsetMethod("setValue", GlyphEnumParWidget, function(val) {
 })
 
 qsetMethod("setDefault", GlyphEnumParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   dropList$setCurrentIndex(which(levels == val) - 1)
 })
 
-
-
 # widget for changing numeric values (general for any numeric range, but
 # for now hard-coded for a 0-1 range)
-qsetClass("RangeParWidget", Qt$QWidget, function(gp, par, type,parent = NULL)
+qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
 {
   super(parent)
-  this$gp <- gp; this$par <- par; this$type <- type
+  this$obj <- obj; this$par <- par; this$type <- type
 
-  initVal <- eval(parse(text=paste("gp$",par,sep="")))
-  #this$minVal <- eval(parse(text=paste("gp$",par,"@min",sep="")))
+  initVal <- obj$field(par)
+  #this$minVal <- eval(parse(text=paste("obj$",par,"@min",sep="")))
   this$minVal <- 0
-  #this$maxVal <- eval(parse(text=paste("gp$",par,"@max",sep="")))
+  #this$maxVal <- eval(parse(text=paste("obj$",par,"@max",sep="")))
   this$maxVal <- 1
   
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
 
   if(type == "double") {
     this$spin <- Qt$QDoubleSpinBox()
@@ -343,14 +350,14 @@ qsetClass("RangeParWidget", Qt$QWidget, function(gp, par, type,parent = NULL)
       sl$setValue(val)
     }
   })
-  # update spinbox when slider changes, and update the gp
+  # update spinbox when slider changes, and update the obj
   qconnect(sl, "valueChanged", function(val) {
     if(type == "double") {
       spin$setValue(val/100)
     } else {
       spin$setValue(val)
     }
-    eval(parse(text=paste("gp$",par," <- spin$value",sep="")))
+    eval(parse(text=paste("obj$",par," <- spin$value",sep="")))
   })
   
   lyt <- Qt$QHBoxLayout()
@@ -374,31 +381,31 @@ qsetMethod("setValue", RangeParWidget, function(val) {
 })
 
 qsetMethod("setDefault", RangeParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   spin$setValue(val)
 })
 
 # widget to change levels from a class extending Enum
-qsetClass("SingleEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL)
+qsetClass("SingleEnumParWidget", Qt$QWidget, function(obj, par, parent = NULL)
 {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  initLvl <- eval(parse(text=paste("gp$",par,sep="")))
+  initLvl <- obj$field(par)
   
-  this$levels <- eval(parse(text=paste("levels(gp$",par,")",sep="")))
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  this$levels <- eval(parse(text=paste("levels(obj$",par,")",sep="")))
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
 
   this$dropList <- Qt$QComboBox()
   sapply(levels, dropList$addItem)
   dropList$setCurrentIndex(which(levels == initLvl) - 1)
 
-  # change gp when user changes level
+  # change obj when user changes level
   qconnect(dropList, "currentIndexChanged(QString)", function(idx) {
-    eval(parse(text=paste("gp$",par,
+    eval(parse(text=paste("obj$",par,
                  " <- dropList$currentText",sep="")))
   })
 
@@ -422,26 +429,26 @@ qsetMethod("setValue", SingleEnumParWidget, function(val) {
 })
 
 qsetMethod("setDefault", SingleEnumParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   dropList$setCurrentIndex(which(levels == val) - 1)
 })
 
 
 # widget to change levels from a class extending Enum with ability to
 # select multiple levels
-qsetClass("MultEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL)
+qsetClass("MultEnumParWidget", Qt$QWidget, function(obj, par, parent = NULL)
 {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  initVal <- eval(parse(text=paste("gp$",par,sep="")))
+  initVal <- obj$field(par)
   
-  this$levels <- eval(parse(text=paste("levels(gp$",par,")",sep="")))
+  this$levels <- eval(parse(text=paste("levels(obj$",par,")",sep="")))
   this$currentVal <- levels %in% initVal
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
 
   lyt <- Qt$QGridLayout()
 
@@ -456,10 +463,10 @@ qsetClass("MultEnumParWidget", Qt$QWidget, function(gp, par, parent = NULL)
     bg$button(i)$setChecked(currentVal[i])
   })
 
-  # change gp when user changes level
+  # change obj when user changes level
   qconnect(bg, "buttonClicked(int)", function(id) {
     currentVal[id] <<- bg$button(id)$checked
-    eval(parse(text=paste("gp$",par," <- levels[currentVal]",
+    eval(parse(text=paste("obj$",par," <- levels[currentVal]",
                    sep="")))
   })
 
@@ -484,14 +491,14 @@ qsetMethod("setValue", MultEnumParWidget, function(val) {
     sapply(seq_along(levels), function(i) {
       bg$button(i)$setChecked(currentVal[i])
     })
-    eval(parse(text=paste("gp$",par," <- levels[currentVal]",sep="")))
+    eval(parse(text=paste("obj$",par," <- levels[currentVal]",sep="")))
   } else {
     stop("Error: one or more levels specified are not valid")
   }
 })
 
 qsetMethod("setDefault", MultEnumParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   currentVal <- levels %in% val
   sapply(seq_along(levels), function(i) {
     bg$button(i)$setChecked(currentVal[i])
@@ -500,17 +507,17 @@ qsetMethod("setDefault", MultEnumParWidget, function() {
 
 # widget for changing integer values (obselete at this point since there
 # are not parameters of this type)
-qsetClass("IntParWidget", Qt$QWidget, function(gp, par, type, parent = NULL)
+qsetClass("IntParWidget", Qt$QWidget, function(obj, par, type, parent = NULL)
 {
   super(parent)
-  this$gp <- gp; this$par <- par; this$type <- type
+  this$obj <- obj; this$par <- par; this$type <- type
 
-  initVal <- eval(parse(text=paste("gp$",par,sep="")))
+  initVal <- obj$field(par)
 
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
 
   this$spin <- Qt$QSpinBox()
   if(type == "Negati") {
@@ -528,9 +535,9 @@ qsetClass("IntParWidget", Qt$QWidget, function(gp, par, type, parent = NULL)
   }
   spin$setValue(initVal)
 
-  # update gp when spinbox changes
+  # update obj when spinbox changes
   qconnect(spin, "valueChanged(int)", function(val) {
-    eval(parse(text=paste("gp$",par," <- spin$value",sep="")))
+    eval(parse(text=paste("obj$",par," <- spin$value",sep="")))
   })
 
   lyt <- Qt$QHBoxLayout()
@@ -553,23 +560,23 @@ qsetMethod("setValue", IntParWidget, function(val) {
 })
 
 qsetMethod("setDefault", IntParWidget, function() {
-  val <- eval(parse(text=paste("gp$",par,sep="")))
+  val <- obj$field(par)
   spin$setValue(val)
 })
 
 
 
 # widget to handle changing character strings
-qsetClass("CharParWidget", Qt$QWidget, function(gp, par, parent = NULL) {
+qsetClass("CharParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
   super(parent)
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  initText <- eval(parse(text=paste("gp$",par,sep="")))
+  initText <- obj$field(par)
 
-  #parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
-  #  gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
 
   this$parEdit <- Qt$QLineEdit(initText)
 
@@ -592,179 +599,27 @@ qsetMethod("getValue", CharParWidget, function() {
   parEdit$text
 })
 
-# also updates the gp object
+# also updates the obj object
 qsetMethod("setValue", CharParWidget, function(txt) {
     parEdit$setText(txt)
-    eval(parse(text=paste("gp$",par," <- parEdit$text",sep="")))
+    eval(parse(text=paste("obj$",par," <- parEdit$text",sep="")))
 })
 
 qsetMethod("setDefault", CharParWidget, function() {
-  txt <- eval(parse(text=paste("gp$",par,sep="")))
+  txt <- obj$field(par) 
   parEdit$setText(txt)  
 })
 
 # label for a given parameter, with appropriate text and tooltip
-qsetClass("ParLabel", Qt$QLabel, function(gp, par, parent = NULL) {
+qsetClass("ParLabel", Qt$QLabel, function(obj, par, parent = NULL) {
   super(parent)
 
-  this$gp <- gp; this$par <- par
+  this$obj <- obj; this$par <- par
 
-  parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
-  setText(paste(parInfo,":",sep=""))
-  setToolTip(
-    gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
-    
-})
-
-
-
-
-## for parameters class
-
-# should this inherit from QDialog?
-# submit button not currently necessary due to automatic updating
-qsetClass("ParametersControlPanel", Qt$QWidget, function(gp, parent = NULL) {
-  super(parent)
-
-  #this$submit <- Qt$QPushButton("Submit")
-  this$reset <- Qt$QPushButton("Reset to Defaults")
-
-  ## qconnect(reset, "clicked", function() {
-  ##   gp$reset()
-  ##   sapply(l.wid, function(i) {
-  ##     i$setDefault()
-  ##   })
-  ## })
-
-  blyt <- Qt$QHBoxLayout()
-  blyt$insertStretch(0,1)
-  blyt$addWidget(reset)
-  #blyt$addWidget(submit)
-
-  olyt <- Qt$QVBoxLayout()
-  lyt <- Qt$QFormLayout()
-  lyt$setRowWrapPolicy(Qt$QFormLayout$WrapLongRows)
-
-  # best way to check for a particular class
-  #sapply(pars$output()$value, function(i) is(i,"SingleEnum"))
-
-  this$l.lab <- list()
-  this$l.wid <- list()
-
-  # color widgets
-  sapply(names(gp$parameters())[gp$parameters() == "Color"], function(i) {
-    l.wid[[i]] <<- ColorParWidget(gp, i)
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  sapply(names(gp$parameters())[sapply(names(gp$parameters()),
-                            function(i) is(gp$field(i),"ColorEnum"))],
-    function(i) {
-      l.wid[[i]] <<- ColorEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParsLabel(gp, i)
-      lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-
-  # character widgets
-  sapply(names(gp$parameters())[gp$parameters() == "character"], function(i) {
-    l.wid[[i]] <<- CharParWidget(gp, i)
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  # numeric with range widgets
-  sapply(names(gp$parameters())[gp$parameters() == "NumericWithMin0Max1"],
-                                function(i) {
-    l.wid[[i]] <<- RangeParWidget(gp, i, "double")
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  # integer with range widgets
-  sapply(names(gp$parameters())[gp$parameters() == "IntegerWithRange"],
-         function(i) {
-    l.wid[[i]] <<- RangeParWidget(gp, i, "int")
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-
-  # integer widgets
-  sapply(names(gp$parameters())[gp$parameters() %in% c("PositiveInteger",
-    "NonnegativeInteger","NegativeInteger","NonpositiveInteger")],
-         function(i) {
-    l.wid[[i]] <<- IntParWidget(gp, i, substr(gp$parameters()[i],1,6))
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-
-  sapply(names(gp$parameters())[gp$parameters() == "AsIsOrnumeric"],
-         function(i) {
-    l.wid[[i]] <<- CharParWidget(gp, i)
-    l.lab[[i]] <<- ParsLabel(gp, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-
-  # single enum widgets (not color or glyph enum)
-  sapply(names(gp$parameters())[(sapply(names(gp$parameters()),
-                            function(i) is(gp$field(i),"SingleEnum"))) &
-                                (sapply(names(gp$parameters()),
-                            function(i) !is(gp$field(i),"ColorEnum"))) &
-                                (sapply(names(gp$parameters()),
-                            function(i) !is(gp$field(i),"GlyphEnum")))],
-    function(i) {
-      l.wid[[i]] <<- SingleEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParsLabel(gp, i)
-      lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-
-  # multiple enum widgets
-  sapply(names(gp$parameters())[sapply(names(gp$parameters()),
-                            function(i) is(gp$field(i),"MultipleEnum"))],
-    function(i) {
-      l.wid[[i]] <<- MultEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParsLabel(gp, i)
-      lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  # glyph enum widgets
-  sapply(names(gp$parameters())[sapply(names(gp$parameters()),
-                            function(i) is(gp$field(i),"GlyphEnum"))],
-    function(i) {
-      l.wid[[i]] <<- GlyphEnumParWidget(gp, i)
-      l.lab[[i]] <<- ParsLabel(gp, i)
-      lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-    
-
-  
-  olyt$addLayout(lyt)
-  olyt$addLayout(blyt)
-
-  setLayout(olyt)
-})
-
-qsetMethod("setValue", ParametersControlPanel, function(par, val) {
-  l.wid[[par]]$setValue(val)
-})
-
-## # label for a given parameter, with appropriate text and tooltip
-qsetClass("ParsLabel", Qt$QLabel, function(gp, par, parent = NULL) {
-  super(parent)
-
-  this$gp <- gp; this$par <- par
-
-  ## # eventually, fix these so they display the text field and tooltip info
-  ## parInfo <- gp$output()$parinfo[names(gp$output()$parinfo) == par]
+  ## parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   ## setText(paste(parInfo,":",sep=""))
   ## setToolTip(
-  ##   gp$output()$tooltipinfo[names(gp$output()$tooltipinfo) == par])
-
-  setText(paste(par,":",sep=""))
+  ##   obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
     
 })
-
-
-
-
 

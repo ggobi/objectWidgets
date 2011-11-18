@@ -1,0 +1,2 @@
+setOldClass("QIcon")
+## setOldClass("QWidget")

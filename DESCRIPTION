@@ -1,10 +1,21 @@
-Package: objectProperties
-Title: A factory of self-describing properties.
+Package: objectWidgets
+Title: A set of QT based widgets
 Description: objectWidgets
 Author: Tengfei Yin, Jason Crowley, Michael Lawrence
 Maintainer: Tengfei Yin <yintengfei@gmail.com>
-Depends: R (>= 2.12), methods, objectProperties, qtbase
-Imports: methods, objectProperties, qtbase
-Version: 0.0.1
+Depends: R (>= 2.12), methods, qtbase, objectProperties (>= 0.6.2) 
+Imports: qtbase, objectProperties (>= 0.6.2) 
+Version: 0.5.1
 License: GPL (>= 2)
-Collate: 
+Collate: AllClasses.R
+	 widget-method.R
+	 AnnotatedWidget-class.R
+	 AppWindow-GUI.R
+	 ControlPanel-GUI.R
+	 SimpleViewer-GUI.R
+	 Item-class.R
+	 Group-class.R
+	 IMode-class.R
+	 VMode-class.R
+	 
+
