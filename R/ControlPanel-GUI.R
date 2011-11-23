@@ -48,88 +48,55 @@ qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
   this$l.wid <- list()
   ## FIXME: no visible
   # color widgets
-  sapply(names(ppt)[ppt == "Color"], function(i) {
-    l.wid[[i]] <<- ColorParWidget(obj, i)
-    l.lab[[i]] <<- ParLabel(obj, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  ##   sapply(names(ppt)[ppt == "Color"], function(i) {
-  ##   l.wid[[i]] <<- ColorParWidget(obj, i)
-  ##   l.lab[[i]] <<- ParLabel(obj, i)
-  ##   lyt$addRow(l.lab[[i]], l.wid[[i]])
-  ## })
-
-  sapply(names(ppt)[sapply(ppt, function(i) extends(i,"ColorEnum"))],
-    function(i) {
+  sapply(names(ppt), function(i) {
+    if(ppt[i] == "Color"){
+      l.wid[[i]] <<- ColorParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+    if(extends(ppt[i],"ColorEnum")){
       l.wid[[i]] <<- ColorEnumParWidget(obj, i)
       l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
+    }
+    if(ppt[i] == "character"){
+      l.wid[[i]] <<- CharParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
 
-  # character widgets
-  sapply(names(ppt)[ppt == "character"], function(i) {
-    l.wid[[i]] <<- CharParWidget(obj, i)
-    l.lab[[i]] <<- ParLabel(obj, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
+    }
+    if(ppt[i] == "NumericWithMin0Max1"){
+      l.wid[[i]] <<- RangeParWidget(obj, i, "double")
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+    if(ppt[i] %in% 
+       c("PositiveInteger","NonnegativeInteger","NegativeInteger",
+         "NonpositiveInteger")){
+      l.wid[[i]] <<- IntParWidget(obj, i, substr(ppt[i],1,6))
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
 
-  # numeric with range widgets
-  sapply(names(ppt)[ppt == "NumericWithMin0Max1"], function(i) {
-    l.wid[[i]] <<- RangeParWidget(obj, i, "double")
-    l.lab[[i]] <<- ParLabel(obj, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  # integer with range widgets
-  ## sapply(obj$output()$pars[ppt == "IntegerWithRange")], function(i) {
-  ##   l.wid[[i]] <<- RangeParWidget(obj, i, "int")
-  ##   l.lab[[i]] <<- ParLabel(obj, i)
-  ##   lyt$addRow(l.lab[[i]], l.wid[[i]])
-  ## })  
-
-  # integer widgets
-  sapply(names(ppt)[ppt %in%
-    c("PositiveInteger","NonnegativeInteger","NegativeInteger",
-      "NonpositiveInteger")], function(i) {
-    l.wid[[i]] <<- IntParWidget(obj, i, substr(ppt[i],1,6))
-    l.lab[[i]] <<- ParLabel(obj, i)
-    lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })  
-  
-  # single enum widgets (not color or glyph enum)
-  sapply(names(ppt)[
-                          (sapply(ppt, function(i)
-                                  extends(i,"SingleEnum"))) &
-                          (sapply(ppt, function(i)
-                                  !extends(i,"ColorEnum"))) &
-                          (sapply(ppt, function(i)
-                                  !extends(i,"GlyphEnum")))],
-         function(i) {
-           l.wid[[i]] <<- SingleEnumParWidget(obj, i)
-           l.lab[[i]] <<- ParLabel(obj, i)
-           lyt$addRow(l.lab[[i]], l.wid[[i]])
-         })  
-
-  # multiple enum widgets
-  sapply(names(ppt)[sapply(ppt,
-                                       function(i) extends(i,"MultipleEnum"))],
-    function(i) {
+    }
+    if(extends(ppt[i],"SingleEnum") && (!extends(ppt[i],"ColorEnum")) && (!extends(ppt[i],"GlyphEnum"))){
+      l.wid[[i]] <<- SingleEnumParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+    if(extends(ppt[i],"MultipleEnum")){
       l.wid[[i]] <<- MultEnumParWidget(obj, i)
       l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
-  })
-
-  # glyph enum widgets
-  sapply(names(ppt)[
-          (sapply(ppt, function(i) extends(i,"GlyphEnum")))],
-    function(i) {
+    }
+    if(extends(ppt[i],"GlyphEnum")){
       l.wid[[i]] <<- GlyphEnumParWidget(obj, i)
       l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+      ## l.lab[[i]] <<- ParLabel(obj, i)
+      ## lyt$addRow(l.lab[[i]], l.wid[[i]])
+
   })
-  
-  
   olyt$addLayout(lyt)
   olyt$addLayout(blyt)
 
@@ -617,7 +584,8 @@ qsetClass("ParLabel", Qt$QLabel, function(obj, par, parent = NULL) {
   this$obj <- obj; this$par <- par
 
   ## parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
-  ## setText(paste(parInfo,":",sep=""))
+  parInfo <- par
+  setText(paste(parInfo,":",sep=""))
   ## setToolTip(
   ##   obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
     
