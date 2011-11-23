@@ -157,7 +157,3 @@ IModeGroup <- function(scaleIMode = ScaleIMode(),
 }
 
 
-obj <- IModeGroup()
-ControlPanel(ScaleIMode())
-## obj$widget(1)
-obj$menu()

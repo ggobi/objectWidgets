@@ -1,15 +1,15 @@
 # should this inherit from QDialog?
 # submit button not currently necessary due to automatic updating
 ## need to support properties
-qsetClass("ControlPanel", Qt$QWidget, function(obj, exposed = list(),
+qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
                                                type, parent = NULL) {
   super(parent)
-  if(length(exposed)){
-    ## nm.e <- names(exposed)
-    if(!all(names(obj$properties()) %in% names(exposed)))
+  if(length(visible)){
+    ## nm.e <- names(visible)
+    if(!all(names(obj$properties()) %in% names(visible)))
       stop("Names of list must be within the property set items")
     ## expd <- rep(!)
-    expd <- unlist(exposed)[names(obj$properties())]
+    expd <- unlist(visible)[names(obj$properties())]
     ppt <- obj$properties()[expd]    
   }else{
     ppt <- obj$properties()
@@ -46,7 +46,7 @@ qsetClass("ControlPanel", Qt$QWidget, function(obj, exposed = list(),
 
   this$l.lab <- list()
   this$l.wid <- list()
-  ## FIXME: no exposed
+  ## FIXME: no visible
   # color widgets
   sapply(names(ppt)[ppt == "Color"], function(i) {
     l.wid[[i]] <<- ColorParWidget(obj, i)
@@ -60,12 +60,12 @@ qsetClass("ControlPanel", Qt$QWidget, function(obj, exposed = list(),
   ##   lyt$addRow(l.lab[[i]], l.wid[[i]])
   ## })
 
-  ## sapply(ppt[(sapply(obj$)$value, function(i) is(i,"ColorEnum")))],
-  ##   function(i) {
-  ##     l.wid[[i]] <<- ColorEnumParWidget(obj, i)
-  ##     l.lab[[i]] <<- ParLabel(obj, i)
-  ##     lyt$addRow(l.lab[[i]], l.wid[[i]])
-  ## })  
+  sapply(names(ppt)[sapply(ppt, function(i) extends(i,"ColorEnum"))],
+    function(i) {
+      l.wid[[i]] <<- ColorEnumParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+  })  
 
   # character widgets
   sapply(names(ppt)[ppt == "character"], function(i) {
