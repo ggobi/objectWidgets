@@ -3,8 +3,8 @@ Title: A set of QT based widgets
 Description: objectWidgets
 Author: Tengfei Yin, Jason Crowley, Michael Lawrence
 Maintainer: Tengfei Yin <yintengfei@gmail.com>
-Depends: R (>= 2.12), methods, qtbase, objectProperties (>= 0.6.2) 
-Imports: qtbase,  objectProperties (>= 0.6.2) 
+Depends: R (>= 2.12), methods
+Imports: qtbase, objectSignals (>= 0.10.2), objectProperties (>= 0.6.2) 
 Version: 0.5.1
 License: GPL (>= 2)
 Collate: AllClasses.R
