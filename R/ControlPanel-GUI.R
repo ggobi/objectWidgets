@@ -4,15 +4,28 @@
 qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
                                                type, parent = NULL) {
   super(parent)
-  if(length(visible)){
-    ## nm.e <- names(visible)
-    if(!all(names(obj$properties()) %in% names(visible)))
-      stop("Names of list must be within the property set items")
-    ## expd <- rep(!)
-    expd <- unlist(visible)[names(obj$properties())]
-    ppt <- obj$properties()[expd]    
-  }else{
-    ppt <- obj$properties()
+  if(is.list(visible)){
+    if(length(visible)){
+      ## nm.e <- names(visible)
+      if(!all(names(obj$properties()) %in% names(visible)))
+        stop("Names of list must be within the property set items")
+      ## expd <- rep(!)
+      expd <- unlist(visible)[names(obj$properties())]
+      ppt <- obj$properties()[expd]    
+    }else{
+      ppt <- obj$properties()
+    }
+  }else if(is.character(visible)){
+    if(length(visible)){
+      ## nm.e <- names(visible)
+      if(!all(visible %in% names(obj$properties())))
+        stop("Names of list must be within the property set items")
+      ## expd <- rep(!)
+      expd <- match(visible, names(obj$properties()))
+      ppt <- obj$properties()[expd]    
+    }else{
+      ppt <- obj$properties()
+    }
   }
   #this$submit <- Qt$QPushButton("Submit")
   ## this$reset <- Qt$QPushButton("Reset to Defaults")
