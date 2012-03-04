@@ -8,15 +8,9 @@ Imports: qtbase, objectSignals (>= 0.10.2), objectProperties (>= 0.6.2)
 Version: 0.5.1
 License: GPL (>= 2)
 Collate: AllClasses.R
-	 widget-method.R
 	 icon-method.R
-	 AnnotatedWidget-class.R
 	 AppWindow-GUI.R
 	 ControlPanel-GUI.R
-	 SimpleViewer-GUI.R
-	 Item-class.R
-	 Group-class.R
-	 IMode-class.R
 	 VMode-class.R
 	 
 

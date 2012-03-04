@@ -4,9 +4,9 @@ import(objectSignals)
 import(objectProperties)
 exportPattern("^[^\\.]")
 
-exportClasses(AnnotatedWidget, Item, Group, IModeGroup)
+## exportClasses(AnnotatedWidget, Item, Group, IModeGroup)
 
 ## enums
-exportClasses(BrushModeSingleEnum, DragModeSingleEnum, EdgeBrushModeSingleEnum,
-              LogicalSingleEnum, PointBrushModeSingleEnum,
-              TooltipModeSingleEnum, TooltipPosSingleEnum, ZoomModeSingleEnum)
+## exportClasses(BrushModeSingleEnum, DragModeSingleEnum, EdgeBrushModeSingleEnum,
+##               LogicalSingleEnum, PointBrushModeSingleEnum,
+##               TooltipModeSingleEnum, TooltipPosSingleEnum, ZoomModeSingleEnum)
