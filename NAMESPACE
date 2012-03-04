@@ -1,4 +1,12 @@
+import(methods)
 import(qtbase)
 import(objectSignals)
 import(objectProperties)
 exportPattern("^[^\\.]")
+
+exportClasses(AnnotatedWidget, Item, Group, IModeGroup)
+
+## enums
+exportClasses(BrushModeSingleEnum, DragModeSingleEnum, EdgeBrushModeSingleEnum,
+              LogicalSingleEnum, PointBrushModeSingleEnum,
+              TooltipModeSingleEnum, TooltipPosSingleEnum, ZoomModeSingleEnum)
