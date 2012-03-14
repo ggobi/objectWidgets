@@ -2,8 +2,10 @@
 # submit button not currently necessary due to automatic updating
 ## need to support properties
 qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
-                                               type, parent = NULL) {
+                                               type, parent = NULL, title = "", decimal.extra = 3) {
   super(parent)
+  setWindowTitle(title)
+
   if(is.list(visible)){
     if(length(visible)){
       ## nm.e <- names(visible)
@@ -78,8 +80,8 @@ qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
       lyt$addRow(l.lab[[i]], l.wid[[i]])
 
     }
-    if(ppt[i] == "NumericWithMin0Max1"){
-      l.wid[[i]] <<- RangeParWidget(obj, i, "double")
+    if(extends(ppt[i], "NumericWithRange")){
+      l.wid[[i]] <<- RangeParWidget(obj, i, "double", decimal.extra = decimal.extra)
       l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
     }
@@ -286,16 +288,16 @@ qsetMethod("setDefault", GlyphEnumParWidget, function() {
 
 # widget for changing numeric values (general for any numeric range, but
 # for now hard-coded for a 0-1 range)
-qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
+qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL, decimal.extra = 3)
 {
   super(parent)
   this$obj <- obj; this$par <- par; this$type <- type
 
   initVal <- obj$field(par)
   #this$minVal <- eval(parse(text=paste("obj$",par,"@min",sep="")))
-  this$minVal <- 0
+  this$minVal <- initVal@min
   #this$maxVal <- eval(parse(text=paste("obj$",par,"@max",sep="")))
-  this$maxVal <- 1
+  this$maxVal <- initVal@max
   
   #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
@@ -304,7 +306,7 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
 
   if(type == "double") {
     this$spin <- Qt$QDoubleSpinBox()
-    spin$setDecimals(3)
+    spin$setDecimals(decimalplaces(minVal) + decimal.extra)
     spin$setSingleStep((maxVal - minVal)/100)
   } else {
     this$spin <- Qt$QSpinBox()
@@ -314,9 +316,10 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
 
   # slider -- only supports integers, so need to adjust values
   this$sl <- Qt$QSlider(Qt$Qt$Horizontal)
+
   if(type == "double") {
     sl$setRange(0,100)
-    sl$setValue(as.integer(100*initVal))
+    sl$setValue(100*(initVal - minVal)/(maxVal - minVal))
   } else {
     sl$setRange(minVal,maxVal)
     sl$setValue(initVal)
@@ -325,7 +328,7 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
 
   qconnect(spin, "valueChanged(double)", function(val) {
     if(type == "double") {
-      sl$setValue(as.integer(100*val))
+      sl$setValue(as.integer(100*(val - minVal)/(maxVal - minVal)))
     } else {
       sl$setValue(val)
     }
@@ -333,7 +336,7 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL)
   # update spinbox when slider changes, and update the obj
   qconnect(sl, "valueChanged", function(val) {
     if(type == "double") {
-      spin$setValue(val/100)
+      spin$setValue(val / 100 * (maxVal - minVal) + minVal)
     } else {
       spin$setValue(val)
     }
@@ -603,4 +606,14 @@ qsetClass("ParLabel", Qt$QLabel, function(obj, par, parent = NULL) {
   ##   obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
     
 })
+
+
+## http://stackoverflow.com/questions/5173692/how-to-return-number-of-decimal-places-in-r
+decimalplaces <- function(x) {
+    if ((x %% 1) != 0) {
+        nchar(strsplit(sub('0+$', '', as.character(x)), ".", fixed=TRUE)[[1]][[2]])
+    } else {
+        return(0)
+    }
+}
 
