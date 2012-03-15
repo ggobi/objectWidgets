@@ -80,8 +80,27 @@ qsetClass("ControlPanel", Qt$QWidget, function(obj, visible = list(),
       lyt$addRow(l.lab[[i]], l.wid[[i]])
 
     }
+    if(ppt[i] == "logical"){
+      l.wid[[i]] <<- logicalParWidget(obj, i)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+    if(ppt[i] == "factor"){
+      warning("not implemented yet")
+    }
+    if(ppt[i] == "function"){
+      ## l.wid[[i]] <<- functionParWidget(obj, i)
+      ## l.lab[[i]] <<- ParLabel(obj, i)
+      ## lyt$addRow(l.lab[[i]], l.wid[[i]])
+      message("function not supported yet")
+    }
     if(extends(ppt[i], "NumericWithRange")){
       l.wid[[i]] <<- RangeParWidget(obj, i, "double", decimal.extra = decimal.extra)
+      l.lab[[i]] <<- ParLabel(obj, i)
+      lyt$addRow(l.lab[[i]], l.wid[[i]])
+    }
+    if(extends(ppt[i], "IntegerWithRange")){
+      l.wid[[i]] <<- RangeParWidget(obj, i, "integer", decimal.extra = decimal.extra)
       l.lab[[i]] <<- ParLabel(obj, i)
       lyt$addRow(l.lab[[i]], l.wid[[i]])
     }
@@ -303,14 +322,16 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL, d
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
   #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
-
   if(type == "double") {
     this$spin <- Qt$QDoubleSpinBox()
     spin$setDecimals(decimalplaces(minVal) + decimal.extra)
     spin$setSingleStep((maxVal - minVal)/100)
-  } else {
-    this$spin <- Qt$QSpinBox()
   }
+  if(type == "integer"){
+    this$spin <- Qt$QSpinBox()
+    spin$setSingleStep(1)
+  }
+
   spin$setRange(minVal, maxVal)
   spin$setValue(initVal)
 
@@ -320,19 +341,24 @@ qsetClass("RangeParWidget", Qt$QWidget, function(obj, par, type,parent = NULL, d
   if(type == "double") {
     sl$setRange(0,100)
     sl$setValue(100*(initVal - minVal)/(maxVal - minVal))
-  } else {
+  }
+  if(type == "integer"){
+    sl$setSingleStep(1)
     sl$setRange(minVal,maxVal)
     sl$setValue(initVal)
   }
 
 
-  qconnect(spin, "valueChanged(double)", function(val) {
-    if(type == "double") {
+  if(type == "double"){
+    qconnect(spin, "valueChanged(double)", function(val) {
       sl$setValue(as.integer(100*(val - minVal)/(maxVal - minVal)))
-    } else {
+    })
+  }
+  if(type == "integer"){
+    qconnect(spin, "valueChanged(int)", function(val) {
       sl$setValue(val)
-    }
-  })
+    })
+  }
   # update spinbox when slider changes, and update the obj
   qconnect(sl, "valueChanged", function(val) {
     if(type == "double") {
@@ -432,7 +458,7 @@ qsetClass("MultEnumParWidget", Qt$QWidget, function(obj, par, parent = NULL)
   #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
   #parLabel$setToolTip(
   #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
-
+  
   lyt <- Qt$QGridLayout()
 
   this$bg <- Qt$QButtonGroup()
@@ -481,6 +507,74 @@ qsetMethod("setValue", MultEnumParWidget, function(val) {
 })
 
 qsetMethod("setDefault", MultEnumParWidget, function() {
+  val <- obj$field(par)
+  currentVal <- levels %in% val
+  sapply(seq_along(levels), function(i) {
+    bg$button(i)$setChecked(currentVal[i])
+  })
+})
+
+qsetClass("logicalParWidget", Qt$QWidget, function(obj, par, parent = NULL)
+{
+  super(parent)
+  this$obj <- obj; this$par <- par
+
+  initVal <- obj$field(par)
+  
+  this$levels <- "TRUE"
+  this$currentVal <- levels %in% initVal
+  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
+  #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
+  #parLabel$setToolTip(
+  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
+  
+  lyt <- Qt$QGridLayout()
+
+  this$bg <- Qt$QButtonGroup()
+  bg$setExclusive(FALSE)
+  # initiate buttons, and check those that are within the current value
+  sapply(seq_along(levels), function(i) {
+    button <- Qt$QCheckBox(levels[i])
+    lyt$addWidget(button, floor((i-1)/4), (i-1) %% 4)
+    bg$addButton(button, i)
+    bg$button(i)$setChecked(currentVal[i])
+  })
+
+  # change obj when user changes level
+  qconnect(bg, "buttonClicked(int)", function(id) {
+    currentVal[id] <<- bg$button(id)$checked
+    eval(parse(text=paste("obj$",par," <- ",!as.logical(levels),
+                   sep="")))
+  })
+
+  #lyt <- Qt$QHBoxLayout()
+  #lyt$addWidget(parLabel,1,Qt$Qt$AlignRight)
+  #lyt$addWidget(dropList)
+
+  setLayout(lyt)
+})
+
+qsetMethod("getPar", logicalParWidget, function() {
+  par
+})
+
+qsetMethod("getValue", logicalParWidget, function() {
+  levels[currentVal]
+})
+
+qsetMethod("setValue", logicalParWidget, function(val) {
+  if(all(val %in% levels)) {
+    currentVal <- levels %in% val
+    sapply(seq_along(levels), function(i) {
+      bg$button(i)$setChecked(currentVal[i])
+    })
+    eval(parse(text=paste("obj$",par," <- levels[currentVal]",sep="")))
+  } else {
+    stop("Error: one or more levels specified are not valid")
+  }
+})
+
+qsetMethod("setDefault", logicalParWidget, function() {
   val <- obj$field(par)
   currentVal <- levels %in% val
   sapply(seq_along(levels), function(i) {
@@ -556,11 +650,6 @@ qsetClass("CharParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
 
   initText <- obj$field(par)
 
-  #parInfo <- obj$output()$parinfo[names(obj$output()$parinfo) == par]
-  #this$parLabel <- Qt$QLabel(paste(parInfo,":",sep=""))
-  #parLabel$setToolTip(
-  #  obj$output()$tooltipinfo[names(obj$output()$tooltipinfo) == par])
-
   this$parEdit <- Qt$QLineEdit(initText)
 
   qconnect(parEdit, "editingFinished", function() {
@@ -568,9 +657,7 @@ qsetClass("CharParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
   })
 
   lyt <- Qt$QHBoxLayout()
-  #lyt$addWidget(parLabel,1,Qt$Qt$AlignRight)
   lyt$addWidget(parEdit)
-
   setLayout(lyt)
 })
 
@@ -582,7 +669,7 @@ qsetMethod("getValue", CharParWidget, function() {
   parEdit$text
 })
 
-# also updates the obj object
+
 qsetMethod("setValue", CharParWidget, function(txt) {
     parEdit$setText(txt)
     eval(parse(text=paste("obj$",par," <- parEdit$text",sep="")))
@@ -590,6 +677,52 @@ qsetMethod("setValue", CharParWidget, function(txt) {
 
 qsetMethod("setDefault", CharParWidget, function() {
   txt <- obj$field(par) 
+  parEdit$setText(txt)  
+})
+
+# function
+qsetClass("functionParWidget", Qt$QWidget, function(obj, par, parent = NULL) {
+  super(parent)
+  this$obj <- obj; this$par <- par
+
+  initText <- body(obj$field(par))[2]
+  initText <- deparse(initText)
+
+  this$parEdit <- Qt$QTextEdit(initText)
+  parEdit$LineWrapMode
+  sort(ls(parEdit))
+  fl <- tempfile()
+  class(initText)
+
+  cat(paste(initText, collapse = "\n"), file =fl)
+  system(paste("less", fl))
+   temp <- gsub("<-", "=", initText)
+Qt$QTextEdit(temp)
+  qconnect(parEdit, "editingFinished", function() {
+    setValue(parEdit$text)
+  })
+
+  lyt <- Qt$QHBoxLayout()
+  lyt$addWidget(parEdit)
+  setLayout(lyt)
+})
+
+qsetMethod("getPar", functionParWidget, function() {
+  par
+})
+
+qsetMethod("getValue", functionParWidget, function() {
+  parEdit$text
+})
+
+# also updates the obj object
+qsetMethod("setValue", functionParWidget, function(txt) {
+    parEdit$setText(txt)
+    eval(parse(text=paste("obj$",par," <- parEdit$text",sep="")))
+})
+
+qsetMethod("setDefault", functionParWidget, function() {
+  txt <- body(obj$field(par))[2]
   parEdit$setText(txt)  
 })
 
