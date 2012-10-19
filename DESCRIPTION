@@ -1,16 +1,23 @@
 Package: objectWidgets
-Title: A set of QT based widgets
-Description: objectWidgets
+Title: A set of abstraction of widgets
+Description: A set of abstraction of widgets
 Author: Tengfei Yin, Jason Crowley, Michael Lawrence
 Maintainer: Tengfei Yin <yintengfei@gmail.com>
 Depends: R (>= 2.12), methods
-Imports: qtbase, objectSignals (>= 0.10.2), objectProperties (>= 0.6.2) 
-Version: 0.5.1
+Imports: objectSignals (>= 0.10.2), objectProperties (>= 0.6.2) 
+Version: 0.5.3
 License: GPL (>= 2)
-Collate: AllClasses.R
-	 icon-method.R
-	 AppWindow-GUI.R
-	 ControlPanel-GUI.R
+Collate: Icon-class.R 	
+	 AnnotatedWidget-class.R
+	 Item-class.R
+	 Scene-class.R
+	 View-class.R	 
+	 Layer-class.R 	
+	 Legend-class.R	
+	 Theme-class.R
+	 Tooltip-class.R 	
+	 IMode-class.R 	
 	 VMode-class.R
-	 
+
+
 

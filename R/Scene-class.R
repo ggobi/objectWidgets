@@ -1,0 +1,1 @@
+setClass("Scene", contains = "VIRTUAL")

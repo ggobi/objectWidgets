@@ -1,0 +1,2 @@
+setClass("Icon", contains = "VIRTUAL")
+

@@ -1,0 +1,2 @@
+setClass("View", contains = "VIRTUAL")
+
