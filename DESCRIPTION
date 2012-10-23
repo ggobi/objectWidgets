@@ -7,7 +7,9 @@ Depends: R (>= 2.12), methods
 Imports: objectSignals (>= 0.10.2), objectProperties (>= 0.6.2) 
 Version: 0.5.3
 License: GPL (>= 2)
-Collate: Icon-class.R 	
+Collate: utils.R
+	 Widget-class.R
+	 Icon-class.R 	
 	 AnnotatedWidget-class.R
 	 Item-class.R
 	 Scene-class.R
@@ -18,6 +20,8 @@ Collate: Icon-class.R
 	 Tooltip-class.R 	
 	 IMode-class.R 	
 	 VMode-class.R
+	 PropertyWidget-class.R
+
 
 
 

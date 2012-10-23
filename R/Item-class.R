@@ -1,4 +1,5 @@
-setRefClass("Item", contains = c("AnnotatedWidget", "VIRTUAL"),
+setClass("Item", contains = "VIRTUAL")
+setRefClass("ItemWidget", contains = c("AnnotatedWidget", "Item"),
             fields = list(
               checked = "logical"
               ),
@@ -14,24 +15,24 @@ setRefClass("Item", contains = c("AnnotatedWidget", "VIRTUAL"),
                 callSuper(...)
               }))
 
-setClass("ItemList",  contains = "list")
-setValidity("ItemList", function(object){
-  res <- unlist(lapply(object, is, "Item"))
+setClass("ItemWidgetList",  contains = "list")
+setValidity("ItemWidgetList", function(object){
+  res <- unlist(lapply(object, is, "ItemWidget"))
   if(all(res))
     TRUE
   else
-    paste("Entry ", which(!res), " is not Item class")
+    paste("Entry ", which(!res), " is not ItemWidget class")
 })
 
 ## FIXME: add validation
-ItemList <- function(...)
+ItemWidgetList <- function(...)
 {
   items <- list(...)
   if (length(items) == 1 && is.list(items[[1L]]))
     items <- items[[1L]]
   if (!all(sapply(items, is, "Item")))
     stop("all elements in '...' must be Item objects")
-  ans <- IRanges:::newSimpleList("ItemList", items)
+  new("ItemWidgetList",  items)
   ans
 }
 

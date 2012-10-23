@@ -1,4 +1,4 @@
-AnnotatedWidget.gen <- setRefClass("AnnotatedWidget",
+AnnotatedWidget.gen <- setRefClass("AnnotatedWidget", contains = "Widget",
                                    fields = list(icon = "Icon",
                                      text = "character"),
                                    methods = list(
