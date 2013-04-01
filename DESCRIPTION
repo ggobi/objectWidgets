@@ -12,6 +12,7 @@ Collate: utils.R
 	 Icon-class.R 	
 	 AnnotatedWidget-class.R
 	 Item-class.R
+	 Group-class.R
 	 Scene-class.R
 	 View-class.R	 
 	 Layer-class.R 	
