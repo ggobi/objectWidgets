@@ -1,3 +1,5 @@
 setClass("Icon", contains = "VIRTUAL")
-setRefClass("IconWidget", contains = "Widget")
-
+setClass("IconWidget", contains = "Widget")
+setMethod("Widget", "Icon", function(obj, ...){
+  new("IconWidget", ...)
+})

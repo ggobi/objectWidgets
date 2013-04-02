@@ -1,28 +1,28 @@
 ## ======================================================================
 ## Enum used in IMode class
 ## ======================================================================
-setSingleEnum("TooltipMode", levels = c("Off", "Identify", "Metainfo","Text",
-                               "Position"))
-setSingleEnum("TooltipPos", levels = c("TopLeft", "TopRight",
-                                       "BottomLeft", "BottomRight",
-                                       "Float"))
-setSingleEnum("BrushMode", levels = c("Transient", "Persistent", "Off"))
-setSingleEnum("PointBrushMode", levels = c("Off", "ColorAndGlyph",
-                                  "ColorOnly", "GlyphOnly",
-                                  "Shadow", "Unshadow"))
-setSingleEnum("EdgeBrushMode", levels = c("Off", "ColorAndLine",
-                                 "ColorOnly", "LineOnly", "Shadow", "Unshadow"))
-setSingleEnum("DragMode",  levels = c("NoDrag", "ScrollHandDrag", "RubberBandDrag"))
-setGeneric("getQtEnum", function(x,...) standardGeneric("getQtEnum"))
-setMethod("getQtEnum", "DragModeSingleEnum", function(x){
-  val <- switch(x,
-                NoDrag = Qt$QGraphicsView$NoDrag,
-                ScrollHandDrag = Qt$QGraphicsView$ScrollHandDrag,
-                RubberBandDrag = Qt$QGraphicsView$RubberBandDrag)
-})
+setSingleEnum("TooltipMode",
+              levels = c("Off", "Identify", "Metainfo","Text", "Position"))
 
+setSingleEnum("TooltipPos",
+              levels = c("TopLeft", "TopRight", "BottomLeft", "BottomRight", "Float"))
 
-setSingleEnum("ZoomMode", levels = c("Vertical", "Horizontal", "Both", "Off"))
+setSingleEnum("BrushMode",
+              levels = c("Transient", "Persistent", "Off"))
+
+setSingleEnum("PointBrushMode",
+              levels = c("Off", "ColorAndGlyph", "ColorOnly",
+                         "GlyphOnly", "Shadow", "Unshadow"))
+
+setSingleEnum("EdgeBrushMode",
+              levels = c("Off", "ColorAndLine", "ColorOnly",
+                         "LineOnly", "Shadow", "Unshadow"))
+
+setSingleEnum("DragMode",
+              levels = c("NoDrag", "ScrollHandDrag", "RubberBandDrag"))
+
+setSingleEnum("ZoomMode",
+              levels = c("Vertical", "Horizontal", "Both", "Off"))
 
 ## ======================================================================
 ## IMode class
@@ -31,14 +31,13 @@ setClass("IMode", contains = "VIRTUAL")
 
 setMode <- function(name, modes,
                     contains = character(),
-                    where = topenv(parent.frame())){
+                    where = topenv(parent.frame()),
+                    ...){
   nm <- paste(name, "Mode", sep = "")
-  ## contains <- c("PropertySet", contains)
-  parsName <- paste(nm, "Parameters", sep = "")
+  parsName <- paste(nm, "PropertySet", sep = "")
   pars <- setPropertySet(parsName, modes)
-  ## parsName <- pars$className
   setRefClass(nm, fields = list(pars = pars$className),
-              contains = c("IMode",  "Item", contains),
+              contains = c("IMode",  "ItemWidget", contains),
               where = where,
               methods = list(
                 initialize = function(t = as.character(class(.self)), ...){
@@ -56,7 +55,7 @@ ScaleMode.gen <- setMode("Scale",
 ScaleMode <- function(dragMode = "ScrollHandDrag",
                       zoomMode = "Vertical",
                       ...){
-  pars <- new("ScaleModeParameters", dragMode = dragMode, zoomMode = zoomMode)
+  pars <- new("ScaleModePropertySet", dragMode = dragMode, zoomMode = zoomMode)
   obj <- ScaleMode.gen$new(pars = pars, ...)
 }
 
@@ -70,7 +69,7 @@ BrushMode <- function(brushMode = "Off",
                       pointBrushMode = "Off",
                       edgeBrushMode = "Off",
                       ...){
-  pars <- new("BrushModeParameters", brushMode = brushMode,
+  pars <- new("BrushModePropertySet", brushMode = brushMode,
               pointBrushMode = pointBrushMode,
               edgeBrushMode = edgeBrushMode)
   obj <- BrushMode.gen$new(pars = pars, ...)
@@ -86,10 +85,29 @@ IdentifyMode <- function(tooltipMode = "Off",
                          tooltipPos = "Float",
                          hoverMode = "FALSE",
                          ...){
-  pars <- new("IdentifyModeParameters",
+  pars <- new("IdentifyModePropertySet",
               tooltipMode = tooltipMode,
               tooltipPos = tooltipPos,
               hoverMode = hoverMode)
   obj <- IdentifyMode.gen$new(pars = pars, ...)
 }
 
+
+IModeGroupWidget.gen <- setGroupWidget("IMode")
+IModeGroupWidget <- function(scaleMode = ScaleMode(),
+                       brushMode = BrushMode(),
+                       identifyMode = IdentifyMode(),
+                       exclusive = TRUE,
+                       text = "Interaction Group"){
+  
+  items <- ItemList(scaleMode = scaleMode,
+                    brushMode = brushMode,
+                    identifyMode = identifyMode)
+  obj <- IModeGroupWidget.gen$new(items = items, exclusive = exclusive)
+  obj$setText(text)
+  obj
+}
+
+## setMethod("Widget", "ImodeGroup", function(obj, ...){
+##   IModeGroupWidget(...)
+## })

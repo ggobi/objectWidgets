@@ -1,15 +1,57 @@
-setRefClass("PropertyWidget", contains = "Widget")
-setRefClass("PropertySetWidget", contains = c("PropertySet", "PropertyWidget"))
-setRefClass("ColorWidget", contains = c("Color", "PropertyWidget"))
-setRefClass("ColorEnumWidget", contains = c("ColorEnum", "PropertyWidget"))
-setRefClass("GlyphEnumWidget", contains = c("GlyphEnum", "PropertyWidget"))
-setRefClass("SingleEnumWidget", contains = c("SingleEnum", "PropertyWidget"))
-setRefClass("MultilpleEnumWidget", contains = c("MultipleEnum", "PropertyWidget"))
-setRefClass("PositiveIntegerWidget", contains = c("PositiveInteger", "PropertyWidget"))
-setRefClass("NegativeIntegerWidget", contains = c("NegativeInteger", "PropertyWidget"))
-setRefClass("NonpositiveIntegerWidget", contains = c("NonpositiveInteger", "PropertyWidget"))
-setRefClass("NonnegativeIntegerWidget", contains = c("NonnegativeInteger", "PropertyWidget"))
-setRefClass("NumericWithRangeWidget", contains = c("NumericWithRange", "PropertyWidget"))
-## setRefClass("IntegerWithRangeWidget", contains = c("IntegerWithRange", "PropertyWidget"))
-setRefClass("NumericWithMin0Max1Widget", contains = c("NumericWithMin0Max1", "PropertyWidget"))
+setOldClass("character")
+setOldClass("factor")
+setOldClass("function")
+setOldClass("logical")
+
+setRefClass("PropertySetWidget",
+         contains = c("Widget", "PropertySet"))
+
+setClass("ColorWidget",
+            contains = c("Widget", "Color"))
+
+setClass("ColorEnumWidget",
+            contains = c("Widget", "ColorEnum"))
+
+setClass("GlyphEnumWidget",
+            contains = c("Widget", "GlyphEnum"))
+
+
+setClass("SingleEnumWidget",
+            contains = c("Widget", "SingleEnum"))
+
+setClass("MultipleEnumWidget",
+            contains = c("Widget", "MultipleEnum"))
+
+setClass("PositiveIntegerWidget",
+            contains = c("Widget", "PositiveInteger"))
+
+setClass("NegativeIntegerWidget",
+            contains = c("Widget", "NegativeInteger"))
+
+setClass("NonpositiveIntegerWidget",
+            contains = c("Widget", "NonpositiveInteger"))
+
+setClass("NonnegativeIntegerWidget",
+            contains = c("Widget", "NonnegativeInteger"))
+
+setClass("NumericWithRangeWidget",
+            contains = c("Widget", "NumericWithRange"))
+
+setClass("NumericWithMin0Max1Widget",
+            contains = c("Widget", "NumericWithMin0Max1"))
+
+setClass("characterWidget",
+            contains = c("Widget", "character"))
+
+setClass("logicalWidget",
+            contains = c("Widget", "logical"))
+
+setClass("factorWidget",
+            contains = c("Widget", "factor"))
+
+setClass("functionWidget",
+            contains = c("Widget", "function"))
+
+
+
 

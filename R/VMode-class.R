@@ -7,7 +7,7 @@ setVMode <- function(name, modes,
                     where = topenv(parent.frame())){
   nm <- paste(name, "ViewMode", sep = "")
   pars <- setPropertySet(nm, modes)
-  parsName <- paste(nm, "Parameters", sep = "")
+  parsName <- paste(nm, "PropertySet", sep = "")
   setRefClass(nm, fields = list(pars = parsName),
               contains = c("ViewMode", "Item", contains),
               where = where,

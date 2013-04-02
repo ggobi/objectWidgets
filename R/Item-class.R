@@ -14,10 +14,13 @@ setRefClass("ItemWidget", contains = c("AnnotatedWidget", "Item"),
                 checked <<- FALSE
                 callSuper(...)
               }))
+setMethod("Widget", "Item", function(obj, ...){
+  new("ItemWidget", ...)
+})
 
-setClass("ItemWidgetList",  contains = "list")
-setValidity("ItemWidgetList", function(object){
-  res <- unlist(lapply(object, is, "ItemWidget"))
+setClass("ItemList",  contains = "list")
+setValidity("ItemList", function(object){
+  res <- unlist(lapply(object, is, "Item"))
   if(all(res))
     TRUE
   else
@@ -25,14 +28,17 @@ setValidity("ItemWidgetList", function(object){
 })
 
 ## FIXME: add validation
-ItemWidgetList <- function(...)
+ItemList <- function(...)
 {
   items <- list(...)
   if (length(items) == 1 && is.list(items[[1L]]))
     items <- items[[1L]]
   if (!all(sapply(items, is, "Item")))
     stop("all elements in '...' must be Item objects")
-  new("ItemWidgetList",  items)
-  ans
+  new("ItemList",  items)
 }
 
+setClass("ItemListWidget", contains = c("ItemList", "AnnotatedWidget"))
+setMethod("Widget", "ItemList", function(obj, ...){
+  new("ItemListWidget", ...)
+})
