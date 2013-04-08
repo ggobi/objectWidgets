@@ -3,3 +3,63 @@ import(objectSignals)
 import(objectProperties)
 exportPattern("^[^\\.]")
 
+exportClasses(AnnotatedWidget, Group, GroupWidget)
+
+export(setMode, ScaleMode, BrushMode,
+       IdentifyMode, IModeGroupWidget)
+
+exportClasses(TooltipModeSingleEnum, TooltipPosSingleEnum,
+              BrushModeSingleEnum, PointBrushModeSingleEnum,
+              EdgeBrushModeSingleEnum, DragModeSingleEnum,
+              ZoomModeSingleEnum, IMode, ScaleModePropertySet,
+              BrushModePropertySet, IdentifyModePropertySet,
+              LogicalSingleEnum, IModeGroupWidget)
+
+exportClasses(Icon, IconWidget)
+
+exportClasses(Item, ItemList, ItemListWidget)
+export(ItemList)
+
+exportClasses(Layer, LayerList, LayerListORNULL)
+export(LayerList)
+
+exportClasses(Legend)
+
+export(setGroupWidget)
+
+## exportClasses(character, factor, function, lo)
+exportClass(PropertySetWidget,
+            ColorWidget,
+            ColorEnumWidget,
+            GlyphEnumWidget,
+            SingleEnumWidget,
+            MultipleEnumWidget,
+            PositiveIntegerWidget,
+            NegativeIntegerWidget,
+            NonpositiveIntegerWidget,
+            NonnegativeIntegerWidget,
+            NumericWithRangeWidget,
+            NumericWithMin0Max1Widget,
+            characterWidget,
+            logicalWidget,
+            factorWidget,
+            functionWidget)
+
+exportClasses(Scene)
+exportClasses(AsIs, AsIsORcharacter)
+exportClasses(CPalSingleEnum, DPalSingleEnum, RescaleSingleEnum,
+              bgColorSingleEnum, ShadowColorSingleEnum)
+exportClasses(Theme, ThemeSingleEnum)
+export(DefaultTheme, DarkTheme)
+
+exportClasses(Tooltip)
+
+exportClasses(ViewMode)
+export(setVMode)
+
+exportClasses(View)
+
+
+exportMethods(Widget, widget)
+exportClasses(Widget)
+
